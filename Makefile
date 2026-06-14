@@ -15,7 +15,8 @@ font: placeholder
 
 # Build from your own Apple Color Emoji font:  make font-apple APPLE=path.ttc
 font-apple:
-	$(PYTHON) tools/build_font.py --from-apple-font "$(APPLE)" -o dist/AppleWhale.ttf
+	$(PYTHON) tools/build_font.py --from-apple-font "$(APPLE)" \
+		--dump-png assets/apple-whale.png -o dist/AppleWhale.ttf
 
 install:
 	./install.sh
