@@ -1,19 +1,16 @@
 # Apple 🐳 (U+1F433) override for postmarketOS
 PYTHON ?= python3
 
-.PHONY: all font placeholder install uninstall test emulator clean
+.PHONY: all font install uninstall test emulator clean
 
 all: font
 
-placeholder: assets/apple-whale-placeholder.png
-assets/apple-whale-placeholder.png:
-	$(PYTHON) tools/make_placeholder.py
-
-# Build the single-glyph sbix font from the placeholder.
-font: placeholder
+# Build the single-glyph sbix font from the bundled Apple whale.
+font:
 	$(PYTHON) tools/build_font.py -o dist/AppleWhale.ttf
 
-# Build from your own Apple Color Emoji font:  make font-apple APPLE=path.ttc
+# Refresh assets/apple-whale.png from your own Apple Color Emoji font, then
+# build:  make font-apple APPLE="/path/Apple Color Emoji.ttc"
 font-apple:
 	$(PYTHON) tools/build_font.py --from-apple-font "$(APPLE)" \
 		--dump-png assets/apple-whale.png -o dist/AppleWhale.ttf
@@ -32,4 +29,4 @@ emulator:
 	sh test/run-emulator.sh
 
 clean:
-	rm -rf dist assets/apple-whale-placeholder.png
+	rm -rf dist

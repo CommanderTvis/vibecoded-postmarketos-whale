@@ -23,15 +23,17 @@ depends="fontconfig font-noto-emoji"
 makedepends="python3 py3-fonttools py3-pillow"
 source="
 	build_font.py
-	make_placeholder.py
 	75-apple-whale.conf
-	apple-whale-placeholder.png
+	apple-whale.png
 "
 options="!check"  # checks run via the project's test/ harness, not abuild
 builddir="$srcdir"
 
 build() {
-	python3 build_font.py --png apple-whale-placeholder.png -o AppleWhale.ttf
+	# build_font.py reads the bundled assets/apple-whale.png; provide it here.
+	mkdir -p assets
+	cp apple-whale.png assets/apple-whale.png
+	python3 build_font.py -o AppleWhale.ttf
 }
 
 package() {
@@ -41,13 +43,6 @@ package() {
 		"$pkgdir"/etc/fonts/conf.d/75-apple-whale.conf
 }
 
-# To use the *genuine* Apple bitmap instead of the bundled placeholder, build
-# the font on a machine that has your own Apple Color Emoji font and replace
-# AppleWhale.ttf before packaging:
-#
-#   python3 build_font.py --from-apple-font "Apple Color Emoji.ttc" -o AppleWhale.ttf
-#
 sha512sums="SKIP  build_font.py
-SKIP  make_placeholder.py
 SKIP  75-apple-whale.conf
-SKIP  apple-whale-placeholder.png"
+SKIP  apple-whale.png"

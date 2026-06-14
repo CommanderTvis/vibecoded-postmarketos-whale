@@ -6,15 +6,10 @@ Because the font holds *only* that codepoint, dropping it ahead of Noto Color
 Emoji in fontconfig substitutes just the whale; every other emoji still falls
 through to Noto.
 
-Image source (in priority order):
-
-  --from-apple-font PATH   Extract the genuine U+1F433 bitmap from an Apple
-                           Color Emoji font you already own (its ``sbix``
-                           strike).  e.g. a copy of
-                           "/System/Library/Fonts/Apple Color Emoji.ttc".
-  --png PATH               Use an arbitrary square PNG as the whale.
-  (default)                assets/apple-whale.png (the genuine glyph, once you
-                           have committed it) else assets/apple-whale-placeholder.png
+The glyph comes from ``assets/apple-whale.png`` (the genuine Apple bitmap).
+Regenerate that asset from an Apple Color Emoji font you own with
+``--from-apple-font "/System/Library/Fonts/Apple Color Emoji.ttc" --dump-png
+assets/apple-whale.png``.
 
 The result is an sbix font (the same colour-bitmap format Apple uses), which
 FreeType/HarfBuzz on postmarketOS render natively.
@@ -34,7 +29,7 @@ from fontTools.ttLib.tables.sbixStrike import Strike
 
 try:
     from PIL import Image
-except ImportError:  # Pillow only needed for --png / placeholder paths
+except ImportError:  # Pillow only used to read the PNG's pixel size
     Image = None
 
 WHALE_CP = 0x1F433
@@ -66,16 +61,13 @@ def extract_from_apple_font(path: str) -> bytes:
 
 
 def default_source() -> str:
-    """The genuine Apple glyph if it has been committed, else the placeholder."""
+    """The genuine Apple whale bitmap committed in the repo."""
     genuine = "assets/apple-whale.png"
-    placeholder = "assets/apple-whale-placeholder.png"
     if os.path.exists(genuine):
         return genuine
-    if os.path.exists(placeholder):
-        return placeholder
     raise SystemExit(
-        "no source image found: run tools/make_placeholder.py, pass --png, "
-        "or extract a genuine glyph with --from-apple-font")
+        f"{genuine} not found: regenerate it from an Apple Color Emoji font "
+        "with --from-apple-font ... --dump-png assets/apple-whale.png")
 
 
 def load_png(path: str) -> bytes:
@@ -147,21 +139,20 @@ def build(png: bytes, out: str) -> None:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__)
-    src = ap.add_mutually_exclusive_group()
-    src.add_argument("--from-apple-font", metavar="TTC",
-                     help="extract the genuine glyph from an Apple emoji font")
-    src.add_argument("--png", metavar="PNG", help="use a custom square PNG")
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--from-apple-font", metavar="TTC",
+                    help="extract the genuine glyph from an Apple emoji font "
+                         "(use with --dump-png to refresh assets/apple-whale.png)")
     ap.add_argument("--dump-png", metavar="PNG",
-                    help="also save the chosen bitmap here (used to commit the "
-                         "extracted Apple glyph as assets/apple-whale.png)")
+                    help="also save the extracted bitmap here (used to commit "
+                         "the Apple glyph as assets/apple-whale.png)")
     ap.add_argument("-o", "--out", default="dist/AppleWhale.ttf")
     args = ap.parse_args()
 
     if args.from_apple_font:
         png = extract_from_apple_font(args.from_apple_font)
-    elif args.png:
-        png = load_png(args.png)
     else:
         png = load_png(default_source())
 

@@ -22,7 +22,6 @@ fail() { printf '  \033[31mFAIL\033[0m %s\n' "$1"; FAILED=1; }
 FAILED=0
 
 echo "== 1. build font =="
-python3 tools/make_placeholder.py >/dev/null
 python3 tools/build_font.py -o dist/AppleWhale.ttf
 
 echo "== 2. structural check (cmap + embedded bitmap) =="

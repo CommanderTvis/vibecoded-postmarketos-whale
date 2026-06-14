@@ -1,8 +1,8 @@
 #!/bin/sh
 # Install the Apple 🐳 (U+1F433) override on this system.
 #
-#   ./install.sh                       # build from the placeholder + install
-#   ./install.sh --from-apple-font F   # use the genuine glyph from font F
+#   ./install.sh                       # build from assets/apple-whale.png + install
+#   ./install.sh --from-apple-font F   # refresh the glyph from font F, then install
 #   PREFIX=$HOME/.local ./install.sh   # per-user install (no root needed)
 #
 # postmarketOS / Alpine note: the font stack here (fontconfig + FreeType +
@@ -28,9 +28,9 @@ fi
 echo ">> building AppleWhale.ttf"
 if [ "${1:-}" = "--from-apple-font" ]; then
     [ -n "${2:-}" ] || { echo "--from-apple-font needs a path"; exit 1; }
-    python3 tools/build_font.py --from-apple-font "$2" -o dist/AppleWhale.ttf
+    python3 tools/build_font.py --from-apple-font "$2" \
+        --dump-png assets/apple-whale.png -o dist/AppleWhale.ttf
 else
-    [ -f assets/apple-whale-placeholder.png ] || python3 tools/make_placeholder.py
     python3 tools/build_font.py -o dist/AppleWhale.ttf
 fi
 
