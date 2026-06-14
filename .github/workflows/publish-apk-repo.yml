@@ -62,10 +62,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # Turn on Pages (Source: GitHub Actions) via the API, so no manual
-      # Settings -> Pages click is needed the first time.
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # NOTE: Pages must be enabled ONCE by a repo admin (Settings -> Pages ->
+      # Source: GitHub Actions). The workflow token only has 'pages: write',
+      # not the repo-admin rights needed to create the Pages site, so it
+      # cannot self-enable the first time. After that, deploys are automatic.
       - id: deployment
         uses: actions/deploy-pages@v4
