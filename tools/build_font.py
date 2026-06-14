@@ -13,7 +13,8 @@ Image source (in priority order):
                            strike).  e.g. a copy of
                            "/System/Library/Fonts/Apple Color Emoji.ttc".
   --png PATH               Use an arbitrary square PNG as the whale.
-  (default)                assets/apple-whale-placeholder.png
+  (default)                assets/apple-whale.png (the genuine glyph, once you
+                           have committed it) else assets/apple-whale-placeholder.png
 
 The result is an sbix font (the same colour-bitmap format Apple uses), which
 FreeType/HarfBuzz on postmarketOS render natively.
@@ -22,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import os
 import sys
 
 from fontTools.fontBuilder import FontBuilder
@@ -61,6 +63,19 @@ def extract_from_apple_font(path: str) -> bytes:
     print(f"  extracted U+1F433 from {path}: strike {best[0]}px, "
           f"{len(best[1])} bytes")
     return best[1]
+
+
+def default_source() -> str:
+    """The genuine Apple glyph if it has been committed, else the placeholder."""
+    genuine = "assets/apple-whale.png"
+    placeholder = "assets/apple-whale-placeholder.png"
+    if os.path.exists(genuine):
+        return genuine
+    if os.path.exists(placeholder):
+        return placeholder
+    raise SystemExit(
+        "no source image found: run tools/make_placeholder.py, pass --png, "
+        "or extract a genuine glyph with --from-apple-font")
 
 
 def load_png(path: str) -> bytes:
@@ -137,6 +152,9 @@ def main() -> None:
     src.add_argument("--from-apple-font", metavar="TTC",
                      help="extract the genuine glyph from an Apple emoji font")
     src.add_argument("--png", metavar="PNG", help="use a custom square PNG")
+    ap.add_argument("--dump-png", metavar="PNG",
+                    help="also save the chosen bitmap here (used to commit the "
+                         "extracted Apple glyph as assets/apple-whale.png)")
     ap.add_argument("-o", "--out", default="dist/AppleWhale.ttf")
     args = ap.parse_args()
 
@@ -145,9 +163,14 @@ def main() -> None:
     elif args.png:
         png = load_png(args.png)
     else:
-        png = load_png("assets/apple-whale-placeholder.png")
+        png = load_png(default_source())
 
-    import os
+    if args.dump_png:
+        os.makedirs(os.path.dirname(args.dump_png) or ".", exist_ok=True)
+        with open(args.dump_png, "wb") as fh:
+            fh.write(png)
+        print(f"  wrote {args.dump_png} ({len(png)} bytes)")
+
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     build(png, args.out)
 
