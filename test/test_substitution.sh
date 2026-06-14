@@ -27,13 +27,15 @@ python3 tools/build_font.py -o dist/AppleWhale.ttf
 
 echo "== 2. structural check (cmap + embedded bitmap) =="
 python3 - <<'PY' && pass "font embeds exactly U+1F433, byte-identical to source" || fail "structural check"
-import sys, hashlib
+import sys
+sys.path.insert(0, "tools")
 from fontTools.ttLib import TTFont
+from build_font import default_source  # whichever PNG the build actually uses
 f = TTFont("dist/AppleWhale.ttf")
 cmap = sorted(f.getBestCmap())
 assert cmap == [0x1F433], f"expected only U+1F433, got {[hex(c) for c in cmap]}"
 g = next(iter(f["sbix"].strikes.values())).glyphs["whale"]
-src = open("assets/apple-whale-placeholder.png","rb").read()
+src = open(default_source(), "rb").read()
 assert g.imageData == src, "embedded bitmap != source"
 sys.exit(0)
 PY
