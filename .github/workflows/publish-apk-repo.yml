@@ -1,0 +1,66 @@
+name: Publish apk repo
+
+# Builds the apple-whale-override apk and publishes a signed apk repository to
+# GitHub Pages. Devices then `apk add` it like any other package.
+#
+# One-time setup:
+#   1. Generate a signing key and store it as a repo secret:
+#        openssl genrsa 4096 > key.rsa
+#        gh secret set ABUILD_PRIVKEY < key.rsa
+#   2. Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'packaging/**'
+      - 'tools/build_font.py'
+      - 'fontconfig/**'
+      - 'assets/apple-whale.png'
+      - '.github/workflows/publish-apk-repo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Build inside Alpine (where abuild lives) via Docker, so we avoid the
+      # musl/Node incompatibility of running the whole job in an alpine container.
+      - name: Build + sign apk repo
+        env:
+          ABUILD_PRIVKEY: ${{ secrets.ABUILD_PRIVKEY }}
+          PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+        run: |
+          if [ -z "$ABUILD_PRIVKEY" ]; then
+            echo "::error::secret ABUILD_PRIVKEY is not set (see workflow header)"; exit 1
+          fi
+          docker run --rm \
+            -e ABUILD_PRIVKEY \
+            -e PAGES_URL \
+            -v "$PWD:/src" \
+            alpine:3.20 /src/packaging/build-apk-repo.sh
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

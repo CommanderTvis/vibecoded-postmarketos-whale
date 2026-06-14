@@ -1,7 +1,7 @@
 # Apple 🐳 (U+1F433) override for postmarketOS
 PYTHON ?= python3
 
-.PHONY: all font install uninstall test emulator clean
+.PHONY: all font font-apple install uninstall test emulator repo clean
 
 all: font
 
@@ -27,6 +27,12 @@ test:
 # Boot the real postmarketOS QEMU emulator (needs KVM; run on a dev box).
 emulator:
 	sh test/run-emulator.sh
+
+# Build a signed apk repo into ./public/ (same as CI). Needs Docker + a key:
+#   export ABUILD_PRIVKEY="$$(openssl genrsa 4096 2>/dev/null)"; make repo
+repo:
+	docker run --rm -e ABUILD_PRIVKEY -e PAGES_URL \
+		-v "$$PWD:/src" alpine:3.20 /src/packaging/build-apk-repo.sh
 
 clean:
 	rm -rf dist
