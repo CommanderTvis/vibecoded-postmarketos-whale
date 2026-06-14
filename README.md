@@ -8,4 +8,4 @@ Replace **U+1F433 (🐳)** with the **Apple** glyph on postmarketOS — and *onl
 
 **Mechanism:** postmarketOS uses fontconfig (pick font) + FreeType (rasterise) + HarfBuzz (shape). `75-apple-whale.conf` prepends `AppleWhale.ttf` (sbix, U+1F433 only) ahead of Noto, so HarfBuzz takes 🐳 from our font and every other codepoint from Noto.
 
-MIT. Apple Color Emoji is proprietary and not included — supply your own via `--from-apple-font`.
+**License:** the code/config is MIT. `assets/apple-whale.png` is Apple's copyrighted artwork (Apple Color Emoji), **not** MIT-licensed and not mine to relicense — it's bundled here only for personal device use and will be removed on any DMCA request. To build without it, delete that file and the placeholder is used, or supply your own glyph via `--from-apple-font`.
