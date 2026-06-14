@@ -4,7 +4,7 @@ Replace **U+1F433 (🐳)** with the **Apple** glyph on postmarketOS — and *onl
 
 **Install:** `sudo make install` (revert: `sudo make uninstall`, test: `make test`). Emulator: `make emulator` (pmbootstrap QEMU, needs KVM).
 
-**On a device (apk repo):** a signed repo is published to GitHub Pages by `.github/workflows/publish-apk-repo.yml` (one-time setup in [packaging/apk-repo.md](packaging/apk-repo.md)). Then:
+**On a device (apk repo):** a signed repo is published to GitHub Pages. Then:
 
 ```sh
 wget -O /etc/apk/keys/apple-whale-override.rsa.pub \
