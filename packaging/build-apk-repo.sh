@@ -19,13 +19,16 @@ KEY="apple-whale-override.rsa"          # signature/key file name devices need
 PAGES_URL="${PAGES_URL:-https://USER.github.io/REPO}"
 ARCHES="x86_64 aarch64 armv7 armhf x86 riscv64"
 
-# --- root: enable community, install tools + the build deps up front ---------
-# (pre-installing makedepends means abuild never needs root to fetch them)
+# --- root: enable community, install tools + the package's deps up front -----
+# (pre-installing make+runtime deps means abuild never needs root to fetch them)
 echo ">> enabling community repo + installing build tools"
 v=$(cut -d. -f1,2 /etc/alpine-release)
 grep -q '/community$' /etc/apk/repositories 2>/dev/null \
     || echo "https://dl-cdn.alpinelinux.org/alpine/v$v/community" >> /etc/apk/repositories
-apk add --no-cache alpine-sdk openssl python3 py3-fonttools py3-pillow >/dev/null
+apk add --no-cache \
+    alpine-sdk openssl \
+    python3 py3-fonttools py3-pillow \
+    fontconfig font-noto-emoji >/dev/null
 
 : "${ABUILD_PRIVKEY:?set ABUILD_PRIVKEY to your abuild/RSA private key}"
 
