@@ -4,7 +4,12 @@ Replace **U+1F433 SPOUTING WHALE (🐳)** with the **Apple** version on
 postmarketOS — and *only* that one emoji. Everything else still renders with
 the system emoji font (Noto Color Emoji).
 
-![placeholder Apple-style whale](assets/apple-whale-placeholder.png)
+> ⚠️ **This repo does not contain Apple's whale.** Apple Color Emoji is
+> proprietary and can't be redistributed, so the bundled
+> [`assets/apple-whale-placeholder.png`](assets/apple-whale-placeholder.png)
+> is just a stand-in Apple-*styled* doodle — **not** the real glyph and not
+> what you'll get unless you supply your own Apple font (see
+> [Using the genuine Apple glyph](#using-the-genuine-apple-glyph)).
 
 ## How it works
 
