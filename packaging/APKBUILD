@@ -1,0 +1,53 @@
+# Maintainer: you <you@example.com>
+#
+# postmarketOS / Alpine package: replace U+1F433 (🐳) with the Apple glyph.
+#
+# Drop this directory into your pmaports checkout (e.g.
+# pmaports/temp/apple-whale-override/) together with the project's
+# tools/, fontconfig/ and assets/ files, then:
+#
+#   pmbootstrap build apple-whale-override
+#   pmbootstrap install --add apple-whale-override     # bake into the image
+#   # ...or on a running device:  apk add apple-whale-override
+#
+pkgname=apple-whale-override
+pkgver=1.0.0
+pkgrel=0
+pkgdesc="Render U+1F433 SPOUTING WHALE using the Apple glyph (fontconfig override)"
+url="https://github.com/commandertvis/vibecoded-postmarketos-whale"
+arch="noarch"
+license="MIT"
+# Runtime: fontconfig does the substitution; Noto handles every other emoji.
+depends="fontconfig font-noto-emoji"
+# Build: the single-glyph sbix font is generated from the bundled asset.
+makedepends="python3 py3-fonttools py3-pillow"
+source="
+	build_font.py
+	make_placeholder.py
+	75-apple-whale.conf
+	apple-whale-placeholder.png
+"
+options="!check"  # checks run via the project's test/ harness, not abuild
+builddir="$srcdir"
+
+build() {
+	python3 build_font.py --png apple-whale-placeholder.png -o AppleWhale.ttf
+}
+
+package() {
+	install -Dm644 AppleWhale.ttf \
+		"$pkgdir"/usr/share/fonts/apple-whale/AppleWhale.ttf
+	install -Dm644 75-apple-whale.conf \
+		"$pkgdir"/etc/fonts/conf.d/75-apple-whale.conf
+}
+
+# To use the *genuine* Apple bitmap instead of the bundled placeholder, build
+# the font on a machine that has your own Apple Color Emoji font and replace
+# AppleWhale.ttf before packaging:
+#
+#   python3 build_font.py --from-apple-font "Apple Color Emoji.ttc" -o AppleWhale.ttf
+#
+sha512sums="SKIP  build_font.py
+SKIP  make_placeholder.py
+SKIP  75-apple-whale.conf
+SKIP  apple-whale-placeholder.png"
